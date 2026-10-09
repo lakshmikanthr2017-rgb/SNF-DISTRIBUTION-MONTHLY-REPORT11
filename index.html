@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNF Distribution Monthly Report</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:14px;background:#f1f5fb;color:#26384a;font-family:Arial,"Noto Sans Kannada",sans-serif}
+.container{max-width:1200px;margin:auto}
+h1,h2{text-align:center;color:#285778}
+h1{font-size:23px}h2{font-size:20px}
+.card{background:#fff;border-radius:12px;padding:16px;margin:14px 0;box-shadow:0 3px 12px #0000000d}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+label{display:block;font-size:14px;font-weight:bold;margin-bottom:6px}
+input,select,button{width:100%;min-height:39px;padding:9px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px}
+button{border:0;color:white;background:#087f5b;font-weight:bold;cursor:pointer;margin-top:8px}
+.blue{background:#244ed8}.gray{background:#475569}.red{background:#c62828}
+.status{text-align:center;color:#087f5b;font-weight:bold;font-size:13px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;margin-top:10px;min-width:850px}
+th,td{border:1px solid #d0dbe8;padding:8px;text-align:center;font-size:13px}
+th{background:#dceafd;color:#29465e}
+.total{background:#dcfce7;font-weight:bold}
+.footer{text-align:center;color:#526173;font-weight:bold;font-size:12px;padding:15px}
+.actions button{margin:2px 0}
+@media print{
+ @page{size:A4 landscape;margin:8mm}
+ body{background:#fff;padding:0;font-size:10px}
+ .no-print,.footer{display:none!important}
+ .card{box-shadow:none;margin:0;padding:4px}
+ h1{font-size:17px}h2{font-size:14px}
+ table{min-width:0;width:100%;font-size:9px}
+ th,td{padding:4px;font-size:9px}
+ body.print-register #summarySection{display:none!important}
+ body.print-summary #registerSection{display:none!important}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>ಪೂರಕ ಪೌಷ್ಟಿಕ ಆಹಾರ ವಿತರಣಾ ವಹಿ</h1>
+<h2>SNF Distribution Monthly Report</h2>
+
+<section class="card no-print">
+<h2>ಶಾಲೆಯ ವಿವರಗಳು</h2>
+<div class="grid">
+<div><label for="schoolName">ಶಾಲೆಯ ಹೆಸರು</label><input id="schoolName" placeholder="ಶಾಲೆಯ ಹೆಸರು"></div>
+<div><label for="taluk">ತಾಲ್ಲೂಕು</label><input id="taluk" placeholder="ತಾಲ್ಲೂಕು"></div>
+<div><label for="reportMonth">ವರದಿ ತಿಂಗಳು</label><input id="reportMonth" type="month"></div>
+</div>
+<p id="saveStatus" class="status">ಮಾಹಿತಿ ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಉಳಿಯುತ್ತದೆ.</p>
+</section>
+
+<section class="card no-print">
+<h2>ದೈನಂದಿನ ವಿತರಣೆ ದಾಖಲಿಸಿ</h2>
+<form id="entryForm">
+<div class="grid">
+<div><label for="entryDate">ದಿನಾಂಕ</label><input id="entryDate" type="date" required></div>
+<div><label for="grantType">ಅನುದಾನದ ವಿಧ</label><select id="grantType"><option value="APF">APF</option><option value="STATE">STATE</option></select></div>
+<div><label for="egg15">ಮೊಟ್ಟೆ ಹಾಜರಾತಿ 1–5</label><input id="egg15" type="number" min="0" step="1" value="0" required></div>
+<div><label for="egg68">ಮೊಟ್ಟೆ ಹಾಜರಾತಿ 6–8</label><input id="egg68" type="number" min="0" step="1" value="0" required></div>
+<div><label for="banana15">ಬಾಳೆಹಣ್ಣು ಹಾಜರಾತಿ 1–5</label><input id="banana15" type="number" min="0" step="1" value="0" required></div>
+<div><label for="banana68">ಬಾಳೆಹಣ್ಣು ಹಾಜರಾತಿ 6–8</label><input id="banana68" type="number" min="0" step="1" value="0" required></div>
+<div><label for="totalEntry">ಒಟ್ಟು ದಾಖಲಾತಿ (ಕೈಯಾರೆ ನಮೂದಿಸಿ)</label><input id="totalEntry" type="number" min="0" step="1" value="0" required></div>
+</div>
+<button type="submit">ದಾಖಲೆ ಉಳಿಸಿ</button>
+<button type="button" class="gray" onclick="resetForm()">ಹೊಸ ದಾಖಲಾತಿ</button>
+</form>
+</section>
+
+<section class="card" id="registerSection">
+<h2>ದೈನಂದಿನ ವಿತರಣಾ ವಹಿ</h2>
+<div class="no-print"><button class="blue" onclick="printRegister()">ದೈನಂದಿನ ವಹಿ Print</button></div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>ಕ್ರ.ಸಂ.</th><th>ದಿನಾಂಕ</th><th>ಮೊಟ್ಟೆ 1–5</th><th>ಮೊಟ್ಟೆ 6–8</th><th>ಬಾಳೆಹಣ್ಣು 1–5</th><th>ಬಾಳೆಹಣ್ಣು 6–8</th><th>ಒಟ್ಟು ದಾಖಲಾತಿ</th><th>ಅನುದಾನ</th><th>ಮೊಟ್ಟೆ ವೆಚ್ಚ ₹</th><th>ಬಾಳೆಹಣ್ಣು ವೆಚ್ಚ ₹</th><th class="no-print">ಕ್ರಿಯೆ</th></tr></thead>
+<tbody id="registerBody"></tbody>
+<tfoot><tr><th colspan="6">ಒಟ್ಟು</th><th id="grandEntry" class="total">0</th><th>—</th><th id="grandEgg" class="total">₹0.00</th><th id="grandBanana" class="total">₹0.00</th><th class="no-print">—</th></tr></tfoot>
+</table>
+</div>
+</section>
+
+<section class="card" id="summarySection">
+<h2>ಮಾಸಿಕ ಕ್ರೋಢೀಕೃತ ವರದಿ</h2>
+<div class="no-print"><button class="blue" onclick="printSummary()">ಮಾಸಿಕ ವರದಿ Print</button></div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>ವಿವರ</th><th>APF</th><th>STATE</th><th>ಒಟ್ಟು</th></tr></thead>
+<tbody id="summaryBody"></tbody>
+</table>
+</div>
+</section>
+<footer class="footer">Designed by : LAKSHMIKANTH R | Mob: 9844444871</footer>
+</div>
+
+<script>
+"use strict";
+const DATA_KEY="snf_distribution_entries_v6";
+const HEADER_KEY="snf_distribution_header_v6";
+let entries=[];
+let editingId=null;
+
+function safeLoad(key,fallback){
+ try{const v=JSON.parse(localStorage.getItem(key));return v===null?fallback:v}
+ catch(e){return fallback}
+}
+entries=safeLoad(DATA_KEY,[]);
+if(!Array.isArray(entries)) entries=[];
+
+function saveAll(){
+ try{
+  localStorage.setItem(DATA_KEY,JSON.stringify(entries));
+  localStorage.setItem(HEADER_KEY,JSON.stringify({
+   schoolName:document.getElementById("schoolName").value,
+   taluk:document.getElementById("taluk").value,
+   reportMonth:document.getElementById("reportMonth").value
+  }));
+  document.getElementById("saveStatus").textContent="✓ ಮಾಹಿತಿ ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಉಳಿಸಲಾಗಿದೆ.";
+  return true;
+ }catch(e){
+  document.getElementById("saveStatus").textContent="ಮಾಹಿತಿ ಉಳಿಸಲಾಗಲಿಲ್ಲ. ಬ್ರೌಸರ್ storage ಪರಿಶೀಲಿಸಿ.";
+  alert("ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಮಾಹಿತಿ ಉಳಿಸಲಾಗಲಿಲ್ಲ.");
+  return false;
+ }
+}
+function loadHeader(){
+ const h=safeLoad(HEADER_KEY,{});
+ document.getElementById("schoolName").value=h.schoolName||"";
+ document.getElementById("taluk").value=h.taluk||"";
+ document.getElementById("reportMonth").value=h.reportMonth||new Date().toISOString().slice(0,7);
+}
+["schoolName","taluk","reportMonth"].forEach(id=>{
+ document.getElementById(id).addEventListener("input",()=>{saveAll();renderRegister();renderSummary()});
+ document.getElementById(id).addEventListener("change",()=>{saveAll();renderRegister();renderSummary()});
+});
+function val(id){
+ const el=document.getElementById(id),n=Number(el.value);
+ if(el.value.trim()===""||!Number.isInteger(n)||n<0) throw new Error("ಹಾಜರಾತಿ ಮತ್ತು ಒಟ್ಟು ದಾಖಲಾತಿ 0 ಅಥವಾ ಪೂರ್ಣ ಸಂಖ್ಯೆಯಾಗಿರಬೇಕು.");
+ return n;
+}
+function calc(e){
+ const egg=e.egg15+e.egg68,banana=e.banana15+e.banana68;
+ return {egg,banana,eggCost:egg*6.00,bananaCost:banana*6.00};
+}
+document.getElementById("entryForm").addEventListener("submit",ev=>{
+ ev.preventDefault();
+ try{
+  const d={
+   id:editingId||String(Date.now())+Math.random().toString(16).slice(2),
+   date:document.getElementById("entryDate").value,
+   grant:document.getElementById("grantType").value,
+   egg15:val("egg15"),egg68:val("egg68"),
+   banana15:val("banana15"),banana68:val("banana68"),
+   totalEntry:val("totalEntry")
+  };
+  if(!d.date)throw new Error("ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ.");
+  const idx=entries.findIndex(x=>x.date===d.date&&x.grant===d.grant&&x.id!==editingId);
+  if(idx>=0){
+   if(!confirm("ಈ ದಿನಾಂಕ ಮತ್ತು ಅನುದಾನಕ್ಕೆ ದಾಖಲಾತಿ ಈಗಾಗಲೇ ಇದೆ. ಅದನ್ನು ಬದಲಾಯಿಸಬೇಕೇ?"))return;
+   d.id=entries[idx].id;entries[idx]=d;
+  }else if(editingId){
+   const old=entries.findIndex(x=>x.id===editingId);
+   if(old>=0)entries[old]=d;else entries.push(d);
+  }else entries.push(d);
+  if(saveAll()){resetForm();renderRegister();renderSummary();}
+ }catch(e){alert(e.message||"ದಾಖಲೆ ಉಳಿಸುವಲ್ಲಿ ದೋಷ.");}
+});
+function resetForm(){
+ editingId=null;document.getElementById("entryForm").reset();
+ ["egg15","egg68","banana15","banana68","totalEntry"].forEach(id=>document.getElementById(id).value=0);
+}
+function money(n){return "₹"+Number(n||0).toFixed(2)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function currentEntries(){
+ const m=document.getElementById("reportMonth").value;
+ return entries.filter(e=>!m||String(e.date).slice(0,7)===m).sort((a,b)=>a.date.localeCompare(b.date));
+}
+function renderRegister(){
+ const tb=document.getElementById("registerBody"),list=currentEntries();tb.innerHTML="";
+ let total=0,egg=0,banana=0;
+ list.forEach((e,i)=>{
+  const c=calc(e);total+=Number(e.totalEntry||0);egg+=c.eggCost;banana+=c.bananaCost;
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td>${i+1}</td><td>${esc(e.date)}</td><td>${e.egg15}</td><td>${e.egg68}</td><td>${e.banana15}</td><td>${e.banana68}</td><td class="total">${Number(e.totalEntry||0)}</td><td>${esc(e.grant)}</td><td>${money(c.eggCost)}</td><td>${money(c.bananaCost)}</td><td class="no-print actions"><button class="gray" onclick="editEntry('${e.id}')">ತಿದ್ದು</button><button class="red" onclick="deleteEntry('${e.id}')">ಅಳಿಸಿ</button></td>`;
+  tb.appendChild(tr);
+ });
+ if(!list.length)tb.innerHTML='<tr><td colspan="11">ಈ ತಿಂಗಳ ದಾಖಲಾತಿ ಇಲ್ಲ.</td></tr>';
+ document.getElementById("grandEntry").textContent=total;
+ document.getElementById("grandEgg").textContent=money(egg);
+ document.getElementById("grandBanana").textContent=money(banana);
+}
+function editEntry(id){
+ const e=entries.find(x=>x.id===id);if(!e)return;
+ editingId=e.id;
+ document.getElementById("entryDate").value=e.date;
+ document.getElementById("grantType").value=e.grant;
+ ["egg15","egg68","banana15","banana68","totalEntry"].forEach(k=>document.getElementById(k).value=e[k]||0);
+ document.getElementById("entryForm").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function deleteEntry(id){
+ if(!confirm("ಈ ದಾಖಲಾತಿ ಅಳಿಸಬೇಕೇ?"))return;
+ entries=entries.filter(e=>e.id!==id);
+ if(saveAll()){renderRegister();renderSummary();}
+}
+function renderSummary(){
+ const s={APF:{days:0,total:0,egg:0,banana:0},STATE:{days:0,total:0,egg:0,banana:0}};
+ currentEntries().forEach(e=>{
+  if(!s[e.grant])return;const c=calc(e);s[e.grant].days++;s[e.grant].total+=Number(e.totalEntry||0);s[e.grant].egg+=c.eggCost;s[e.grant].banana+=c.bananaCost;
+ });
+ const rows=[
+  ["ದಾಖಲಾದ ದಿನಗಳು","days","n"],["ಒಟ್ಟು ದಾಖಲಾತಿ","total","n"],
+  ["ಮೊಟ್ಟೆ ವೆಚ್ಚ","egg","m"],["ಬಾಳೆಹಣ್ಣು ವೆಚ್ಚ","banana","m"],["ಒಟ್ಟು ವೆಚ್ಚ","all","m"]
+ ];
+ document.getElementById("summaryBody").innerHTML=rows.map(([label,key,type])=>{
+  const get=g=>type==="m"?(key==="all"?s[g].egg+s[g].banana:s[g][key]):s[g][key];
+  const a=get("APF"),b=get("STATE"),t=a+b;
+  return `<tr><td>${label}</td><td>${type==="m"?money(a):a}</td><td>${type==="m"?money(b):b}</td><td class="total">${type==="m"?money(t):t}</td></tr>`;
+ }).join("");
+}
+function printRegister(){document.body.classList.remove("print-summary");document.body.classList.add("print-register");window.print()}
+function printSummary(){document.body.classList.remove("print-register");document.body.classList.add("print-summary");window.print()}
+window.addEventListener("afterprint",()=>document.body.classList.remove("print-register","print-summary"));
+loadHeader();renderRegister();renderSummary();
+</script>
+</body>
+</html>
